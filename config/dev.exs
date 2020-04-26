@@ -2,8 +2,8 @@ use Mix.Config
 
 # Configure your database
 config :twitter_clone, TwitterClone.Repo,
-  username: "postgres",
-  password: "postgres",
+  username: "swarut",
+  password: "",
   database: "twitter_clone_dev",
   hostname: "localhost",
   show_sensitive_data_on_connection_error: true,
