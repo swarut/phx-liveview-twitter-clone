@@ -1,0 +1,22 @@
+#posts {
+  .post {
+    padding: 10px;
+    border: 1px solid #CCC;
+    margin-bottom: 10px;
+    border-radius: 10px;
+
+    .title {
+      font-weight: bold;
+    }
+
+    .footer {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-end;
+      div {
+        font-size: 80%;
+        margin-left: 20px;
+      }
+    }
+  }
+}

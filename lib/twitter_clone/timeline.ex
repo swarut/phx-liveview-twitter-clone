@@ -18,7 +18,7 @@ defmodule TwitterClone.Timeline do
 
   """
   def list_posts do
-    Repo.all(Post)
+    Repo.all(from p in Post, order_by: [desc: p.id])
   end
 
   @doc """
@@ -53,6 +53,7 @@ defmodule TwitterClone.Timeline do
     %Post{}
     |> Post.changeset(attrs)
     |> Repo.insert()
+    |> broadcast(:post_created)
   end
 
   @doc """
@@ -71,6 +72,7 @@ defmodule TwitterClone.Timeline do
     post
     |> Post.changeset(attrs)
     |> Repo.update()
+    |> broadcast(:post_updated)
   end
 
   @doc """
@@ -100,5 +102,32 @@ defmodule TwitterClone.Timeline do
   """
   def change_post(%Post{} = post, attrs \\ %{}) do
     Post.changeset(post, attrs)
+  end
+
+  def increase_like(%Post{id: id}) do
+    {1, [post]} =
+      from(p in Post, where: p.id == ^id, select: p)
+      |> Repo.update_all(inc: [likes_count: 1])
+
+    broadcast({:ok, post}, :post_updated)
+  end
+
+  def repost(%Post{id: id}) do
+    {1, [post]} =
+      from(p in Post, where: p.id == ^id, select: p)
+      |> Repo.update_all(inc: [reposts_count: 1])
+
+    broadcast({:ok, post}, :post_updated)
+  end
+
+  def subscribe do
+    Phoenix.PubSub.subscribe(TwitterClone.PubSub, "posts")
+  end
+
+  def broadcast({:error, _reason} = error, _event), do: error
+
+  def broadcast({:ok, post}, event) do
+    Phoenix.PubSub.broadcast(TwitterClone.PubSub, "posts", {event, post})
+    {:ok, post}
   end
 end
